@@ -1,0 +1,32 @@
+[
+  {
+    "image_filename": "sample_image_1.jpg",
+    "question": "这张图片中有什么？",
+    "answer": "这张图片中有一只猫。",
+    "label": 0
+  },
+  {
+    "image_filename": "sample_image_2.jpg",
+    "question": "图像中的物体是什么颜色？",
+    "answer": "图像中的物体是红色的。",
+    "label": 1
+  },
+  {
+    "image_filename": "sample_image_3.jpg",
+    "question": "这是什么类型的建筑？",
+    "answer": "这是一座现代风格的摩天大楼。",
+    "label": 2
+  },
+  {
+    "image_filename": "sample_image_4.jpg",
+    "question": "图中有多少人？",
+    "answer": "图中有3个人。",
+    "label": 3
+  },
+  {
+    "image_filename": "sample_image_5.jpg",
+    "question": "这个场景是在室内还是室外？",
+    "answer": "这个场景是在室外，看起来是一个公园。",
+    "label": 4
+  }
+] 

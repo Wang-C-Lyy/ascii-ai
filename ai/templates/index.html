@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>多模态智能体演示</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin-bottom: 15px;
+        }
+        .demo-badge {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">多模态智能体演示
+            {% if demo_mode %}
+            <span class="demo-badge">演示模式</span>
+            {% endif %}
+        </h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="image-upload" class="form-label">上传图像</label>
+                    <input class="form-control" type="file" id="image-upload" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <img id="preview-image" style="display: none;">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="question-input" class="form-label">输入问题</label>
+                    <textarea class="form-control" id="question-input" rows="3" placeholder="请输入您的问题..."></textarea>
+                </div>
+                <button id="submit-btn" class="btn btn-primary" disabled>提交</button>
+                
+                <div id="result" class="result-box" style="display: none;">
+                    <h5>结果</h5>
+                    <div id="classification-result"></div>
+                    <div id="answer-result" class="mt-3"></div>
+                </div>
+                
+                {% if demo_mode %}
+                <div class="alert alert-warning mt-3">
+                    <strong>注意：</strong> 当前处于演示模式，模型尚未训练。结果仅供演示，不代表实际性能。
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.getElementById('preview-image');
+                    img.src = event.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('submit-btn').disabled = false;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            const imageFile = document.getElementById('image-upload').files[0];
+            const question = document.getElementById('question-input').value.trim();
+            
+            if (!imageFile) {
+                alert('请上传图像');
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').innerHTML = '处理中...';
+            
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            if (question) {
+                formData.append('question', question);
+            }
+            
+            fetch('/api/process', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('错误: ' + data.error);
+                } else {
+                    document.getElementById('classification-result').innerHTML = 
+                        `<strong>图像分类:</strong> 类别 ${data.class_id} (置信度: ${(data.confidence * 100).toFixed(2)}%)`;
+                    
+                    if (data.answer) {
+                        document.getElementById('answer-result').innerHTML = 
+                            `<strong>回答:</strong> ${data.answer}`;
+                    } else {
+                        document.getElementById('answer-result').innerHTML = '';
+                    }
+                    
+                    document.getElementById('result').style.display = 'block';
+                }
+                
+                document.getElementById('submit-btn').disabled = false;
+                document.getElementById('submit-btn').innerHTML = '提交';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('处理请求时出错');
+                document.getElementById('submit-btn').disabled = false;
+                document.getElementById('submit-btn').innerHTML = '提交';
+            });
+        });
+    </script>
+</body>
+</html> 
